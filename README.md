@@ -1,6 +1,6 @@
 # ESP8266-based_smart_locker_with_display
 Truly useful device that can be built by everyone.
-You can find the code and a circuit of this device here:  https://github.com/Northstrix/ESP8266-based_smart_locker_with_display/edit/master/README.md
+You can find the code and a circuit of this device here:  https://github.com/Northstrix/ESP8266-based_smart_locker_with_display
 
 To build this device you need:
 1) One ESP8266
