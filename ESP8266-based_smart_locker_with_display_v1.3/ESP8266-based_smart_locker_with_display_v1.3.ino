@@ -117,7 +117,6 @@ button:focus {
   margin-top: 10vh;
   margin-left: auto;
   margin-right: auto;
-  border-top: solid 1px rgba(255,255,255,.5);
   border-radius: 5px;
   box-shadow: 0px 2px 7px rgba(0,0,0,0.2);
   overflow: hidden;
