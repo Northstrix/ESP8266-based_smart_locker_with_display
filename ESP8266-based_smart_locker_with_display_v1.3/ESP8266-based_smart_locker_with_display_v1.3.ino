@@ -1,4 +1,4 @@
-// ESP8266-based smart locker
+// ESP8266-based smart locker (version with TM1637 display)
 // Developed by Maxim Bortnikov
 // For more information and for the circuit of this device visit: https://github.com/Northstrix/ESP8266-based_smart_locker_with_display
 // In this project I used code from:
@@ -39,7 +39,6 @@ color: #EEE;
 border-radius: 20px;
 cursor:pointer;
 overflow: hidden; 
-
 }
 .noselect {
   -webkit-touch-callout: none;
@@ -50,7 +49,6 @@ overflow: hidden;
             user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
-
 button {
   width: 70%;
   height: 50px;
@@ -65,7 +63,6 @@ button {
   align-items: center;
   justify-content: center;
 }
-
 button:after {
   position: absolute;
   content: '';
@@ -75,19 +72,15 @@ button:after {
   background: transparent;
   box-shadow: 0 0 80px rgba(255,255,255,1);
 }
-
 button:hover {
   box-shadow: 0 0 200px rgba(255,255,255,1);
 }
-
 button:hover:after {
   animation: animate 3s infinite linear;
 }
-
 button:focus {
   outline: none;
 }
-
 @keyframes animate {
   0% { transform: translateX(60px)}
   50% {transform: translateX(-60px)}
@@ -196,16 +189,28 @@ function ajaxLoad(ajaxURL)
  
  
 #include <ESP8266WiFi.h>
- 
 #include <ESP8266WiFi.h>       // Include ESP8266WiFi library
 #include <Servo.h>             // Include Servo library
 #include <SPI.h>               // Include SPI library
-#include <Adafruit_GFX.h>      // Include Adafruit graphics library
-#include <Adafruit_PCD8544.h>  // Include Adafruit PCD8544 (Nokia 5110) library
-Adafruit_PCD8544 display = Adafruit_PCD8544(D4, D3, D2, D1, D0);
+#include <TM1637Display.h>
+#define CLK 4
+#define DIO 5
+const uint8_t OPEN[] = {
+SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F,
+SEG_A | SEG_B | SEG_E | SEG_F | SEG_G,
+SEG_A | SEG_G | SEG_D | SEG_E | SEG_F,
+SEG_A | SEG_B | SEG_C | SEG_E | SEG_F,
+  };
+const uint8_t ClSd[] = {
+SEG_A | SEG_D | SEG_E | SEG_F,
+SEG_E | SEG_F,
+SEG_A | SEG_C | SEG_D | SEG_F | SEG_G,
+SEG_B | SEG_C | SEG_D | SEG_E | SEG_G, 
+  };
+TM1637Display display(CLK, DIO);
 Servo servo;
-const char* ssid     = "Blackberry";  // Your SSID (Network's name)
-const char* password = "seasidehills32r12n"; // Password from your network
+const char* ssid     = "Mobile Hotspot 1290";  // Your SSID (Network's name)
+const char* password = "seasidehills99"; // Password from your network
 WiFiServer server(80);
 int opan = 110; // Servo's angle for the open locker
 int clan = 0; // Servo's angle for the closed locker
@@ -213,19 +218,8 @@ String request = "";
  
 void setup() 
 {
-  display.begin();          // Initialise the display
-  display.setContrast(60);  // Set the contrast
-  display.setRotation(0);   // Set the orientation
-  display.clearDisplay();   // Clear the screen (In case something was in it)
-  display.setTextSize(1);   // Set the text size 
-  display.setTextColor(BLACK); // Set the text color
-  display.setCursor(10,8);
-  display.println("Connecting");
-  display.setCursor(22,18);
-  display.println("to the");
-  display.setCursor(5,28);
-  display.println("Access Point");
-  display.display();       // Display the text
+  display.setBrightness(0x0e);
+  display.clear();
   pinMode(12, OUTPUT);
   digitalWrite(12, LOW);  // Turn the green LED off
   pinMode(13, OUTPUT);
@@ -233,6 +227,8 @@ void setup()
   Serial.begin(115200); // Baudrate
   servo.attach(14); // Assign servo to the D5 pin
   servo.write(clan); // Close the locker
+  delay(100);
+  display.setSegments(ClSd);
   Serial.print("Connecting to the Newtork"); // This all will be displayed in the Serial Monitor
   WiFi.begin(ssid, password); 
   while (WiFi.status() != WL_CONNECTED)
@@ -246,16 +242,6 @@ void setup()
   Serial.print("IP Address of network: ");
   Serial.println(WiFi.localIP()); // Display device's IP address in serial monitor
   Serial.println("/");
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(BLACK);
-  display.setCursor(19,5);
-  display.println("Device's");
-  display.setCursor(10,15);
-  display.println("IP address:");
-  display.setCursor(0,25);
-  display.println(WiFi.localIP()); // Display device's IP address on display
-  display.display(); 
 }
  
  
@@ -275,21 +261,10 @@ void loop()
              { 
     servo.write(opan);
     client.print( header );
-    client.print( "The locker is open" ); 
+    client.print( "The locker is open" );
     digitalWrite(12, HIGH);
-    digitalWrite(13, LOW);
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(BLACK);
-    display.setCursor(12,2);
-    display.println("The locker");
-    display.setCursor(20,12);
-    display.println("is open");
-    display.setCursor(10,22);
-    display.println("IP address:");
-    display.setCursor(0,32);
-    display.println(WiFi.localIP()); // Display device's IP address on display
-    display.display();         
+    digitalWrite(13, LOW); 
+    display.setSegments(OPEN);
              }
     else if  ( request.indexOf("LockerOFF") > 0 ) 
              { 
@@ -298,18 +273,7 @@ void loop()
     client.print( "The locker is closed" );
     digitalWrite(12, LOW);
     digitalWrite(13, HIGH);
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(BLACK);
-    display.setCursor(12,2);
-    display.println("The locker");
-    display.setCursor(15,12);
-    display.println("is closed");
-    display.setCursor(10,22);
-    display.println("IP address:");
-    display.setCursor(0,32);
-    display.println(WiFi.localIP()); // Display device's IP address on display
-    display.display();
+    display.setSegments(ClSd);
              }
     else
     {
@@ -322,4 +286,3 @@ void loop()
  
   // The client will actually be disconnected when the function returns and 'client' object is detroyed
 }
-
