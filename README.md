@@ -9,5 +9,7 @@ To build this device you need:
 4) Two resistors 330 ohm - 1K
 5) One green LED
 6) One red LED
-7) One Nokia 5110 LCD display (for the version with Nokia 5110 display)
-6) One TM1637 display (for the version with TM1637 display)
+(Or one RGB LED instead of both.)
+7) One Nokia 5110 LCD display (v1.2)
+8) One TM1637 display (v1.3)
+9) One SSD 1306 display(v1.4)
