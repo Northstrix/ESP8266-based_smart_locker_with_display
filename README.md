@@ -13,3 +13,5 @@ To build this device you need:
 7) One Nokia 5110 LCD display (v1.2)
 8) One TM1637 display (v1.3)
 9) One SSD 1306 display(v1.4)
+</br>
+Note: It's not a fully functional smart lock, rather just smart lock for the locker.
